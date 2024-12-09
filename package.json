@@ -8,7 +8,7 @@
   "keywords": [],
   "author": "Kéri Dominik",
   "license": "ISC",
-  "description": "",
+  "description": "Backend feldat",
   "dependencies": {
     "express": "^4.21.2",
     "sqlite3": "^5.1.7",
@@ -16,3 +16,4 @@
     "swagger-ui-express": "^5.0.1"
   }
 }
+
