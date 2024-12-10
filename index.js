@@ -8,7 +8,7 @@ const port = 3000;
 
 app.use(express.json());
 
-// Change the database initialization to use a file
+
 const db = new sqlite3.Database('./database.sqlite');
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS users (
