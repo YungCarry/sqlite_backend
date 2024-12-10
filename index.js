@@ -8,17 +8,16 @@ const port = 3000;
 
 app.use(express.json());
 
-
-const db = new sqlite3.Database(':memory:');
+// Change the database initialization to use a file
+const db = new sqlite3.Database('./database.sqlite');
 db.serialize(() => {
-  db.run(`CREATE TABLE users (
+  db.run(`CREATE TABLE IF NOT EXISTS users (
     email TEXT PRIMARY KEY,
     firstName TEXT,
     lastName TEXT,
     class TEXT
   )`);
 });
-
 
 const swaggerOptions = {
   swaggerDefinition: {
@@ -92,6 +91,32 @@ app.get('/users', (req, res) => {
 
 /**
  * @swagger
+ * /:
+ *   post:
+ *     summary: Create a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       201:
+ *         description: User created
+ */
+app.post('/users', (req, res) => {
+  const { email, firstName, lastName, class: userClass } = req.body;
+  db.run('INSERT INTO users (email, firstName, lastName, class) VALUES (?, ?, ?, ?)', [email, firstName, lastName, userClass], function(err) {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.status(201).json({ email, firstName, lastName, class: userClass });
+  });
+});
+
+/**
+ * @swagger
  * /{email}:
  *   get:
  *     summary: Retrieve a single user by email
@@ -122,32 +147,6 @@ app.get('/users/:email', (req, res) => {
       return;
     }
     res.json(row);
-  });
-});
-
-/**
- * @swagger
- * /:
- *   post:
- *     summary: Create a new user
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/User'
- *     responses:
- *       201:
- *         description: User created
- */
-app.post('/users', (req, res) => {
-  const { email, firstName, lastName, class: userClass } = req.body;
-  db.run('INSERT INTO users (email, firstName, lastName, class) VALUES (?, ?, ?, ?)', [email, firstName, lastName, userClass], function(err) {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.status(201).json({ email, firstName, lastName, class: userClass });
   });
 });
 
@@ -223,4 +222,3 @@ app.delete('/users/:email', (req, res) => {
 app.listen(port, () => {
   console.log(`A szerver fut: http://localhost:${port}/`);
 });
-
